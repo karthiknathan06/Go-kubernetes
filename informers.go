@@ -53,6 +53,25 @@ func main() {
         },
 	})
 
+	secretInformer := factory.Core().V1().Secrets().Informer()
+
+	secretInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	AddFunc: func(obj interface{}) {
+            secret := obj.(*corev1.Secret)
+            fmt.Printf("Secret added: %s/%s\n", secret.Namespace, secret.Name)
+        },
+        UpdateFunc: func(oldObj, newObj interface{}) {
+            oldSecret := oldObj.(*corev1.Secret)
+            newSecret := newObj.(*corev1.Secret)
+            fmt.Printf("Secret updated: %s\n", oldSecret.Name)
+            fmt.Printf("New secret: %s\n", newSecret.Name)
+        },
+        DeleteFunc: func(obj interface{}) {
+            secret := obj.(*corev1.Secret)
+            fmt.Printf("Secret deleted: %s\n", secret.Name)
+        },
+	})
+
 	//channel is created to stop the informer gracefully
 	stopCh := make(chan struct{})
 	defer close(stopCh)
